@@ -276,3 +276,5 @@ TSWLatexianTemp*
 *.lpz
 
 main.pdf
+venv
+

@@ -14,7 +14,7 @@ tf.autograph.set_verbosity(0)
 np.random.seed(0)
 
 # Number of networks to initialize with random parameters
-number_of_networks = 50
+number_of_networks = 5
 
 
 # input xgrid for which to produce the corresponding outputs
@@ -32,14 +32,12 @@ initializer_name = fit_info["parameters"]["initializer"]
 layer_type = fit_info["parameters"]["layer_type"]
 dropout = fit_info["parameters"]["dropout"]
 
-
 nn_outputs = []
 for sumrule in ["all", False]:
     res = []
     for i in tqdm(range(number_of_networks)):
         # Initialize the NNPDF model with given hyperparameters
         pdf_model = pdfNN_layer_generator(
-            inp=2,
             nodes=[25, 20, 8],
             activations=["tanh", "tanh", "linear"],
             initializer_name="glorot_normal",
@@ -53,14 +51,13 @@ for sumrule in ["all", False]:
             regularizer_args=None,
             impose_sumrule=sumrule,
             scaler=None,
-            parallel_models=1,
         )
 
         # Generate predictions in 14-flavor basis
-        out = pdf_model[0].predict({"pdf_input": input_xgrid}, verbose=False)
+        out = pdf_model.predict({"pdf_input": input_xgrid}, verbose=False)
 
         # transform to 8 flavor basis: sigma, g, v, v3, v8, t3, t8, t15
-        out = out[0, :, [1, 2, 3, 4, 5, 9, 10, 11]]
+        out = out[0, 0, :, [1, 2, 3, 4, 5, 9, 10, 11]]
         res.append(out)
     nn_outputs.append(np.array(res))
 
@@ -73,7 +70,6 @@ pdf_names = ["\Sigma", "g", "V", "V3", "V8", "T3", "T8", "T15"]
 colors = ["C0", "C1"]
 labels = ["MSR and VSR", "w/o sumrules"]
 xscale = "log"
-
 
 plt.clf()
 handles = []
